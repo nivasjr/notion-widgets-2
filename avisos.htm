@@ -2,97 +2,86 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* Design Clean e Profissional */
-        :root {
-            --bg-color: transparent;
-            --text-color: #37352f; /* Cor padrão Notion Light */
-            --alert-color: #e16259; /* Vermelho Notion */
-            --highlight-bg: #f1f1ef; /* Fundo cinza suave */
-        }
-        @media (prefers-color-scheme: dark) {
-            :root { 
-                --text-color: #ffffff;
-                --highlight-bg: #2f2f2f;
-            }
-        }
-        
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg-color); overflow: hidden; display: flex; align-items: center; height: 100vh; }
+        body { margin: 0; padding: 0; overflow: hidden; background-color: transparent; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
 
-        /* Container do Letreiro */
-        .ticker-wrap {
+        /* A Barra do Ticker */
+        .ticker-container {
             width: 100%;
             height: 40px; /* Altura da barra */
-            background-color: var(--highlight-bg);
-            border-radius: 6px;
-            padding-left: 100%; /* Começa fora da tela */
-            box-sizing: border-box;
+            background-color: #111; /* Preto Bolsa de Valores */
+            color: #fff;
             display: flex;
             align-items: center;
-            white-space: nowrap; /* Não quebra linha */
+            overflow: hidden; /* Corta o que sai da tela */
+            white-space: nowrap; /* Impede quebra de linha */
+            border-radius: 4px; /* Cantos levemente arredondados */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
-        /* Animação */
-        .ticker-move {
+        /* O Texto que se move */
+        .ticker-text {
             display: inline-block;
-            animation: ticker 20s linear infinite; /* 20s é a velocidade. Aumente para ficar mais lento */
-        }
-
-        .ticker-item {
-            display: inline-block;
-            padding: 0 2rem;
-            font-size: 14px;
-            color: var(--text-color);
+            padding-left: 100%; /* Começa fora da tela na direita */
+            animation: scroll-left 25s linear infinite; /* 25s = velocidade */
+            font-size: 16px;
             font-weight: 500;
         }
 
-        .alert { color: var(--alert-color); font-weight: 700; text-transform: uppercase; }
-        .separator { opacity: 0.3; }
+        /* Cores Especiais */
+        .highlight-green { color: #00ff41; font-weight: bold; } /* Verde Terminal */
+        .highlight-red { color: #ff3b30; font-weight: bold; }   /* Vermelho Urgente */
+        .separator { margin: 0 15px; color: #555; } /* Separador discreto */
 
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-100%, 0, 0); }
+        @keyframes scroll-left {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
         }
     </style>
 </head>
 <body>
 
-    <div class="ticker-wrap">
-        <div class="ticker-move" id="content">
+    <div class="ticker-container">
+        <div class="ticker-text" id="messages">
             </div>
     </div>
 
     <script>
-        // Pega os parâmetros da URL
+        // 1. Tenta pegar as mensagens da URL
         const params = new URLSearchParams(window.location.search);
-        // Exemplo: ?msgs=URGENTE: Pagar Luz|Reunião 14h|Meta da semana batida
-        const rawMsgs = params.get('msgs');
+        let msgString = params.get('msgs');
 
-        const container = document.getElementById('content');
-        
-        if (!rawMsgs) {
-            container.innerHTML = '<div class="ticker-item alert">Configure a URL: ?msgs=Aviso 1|Aviso 2</div>';
-        } else {
-            // Separa os avisos pelo caractere "|"
-            const listaAvisos = rawMsgs.split('|');
-            let htmlContent = "";
-
-            // Cria o HTML repetido para dar a ilusão de loop infinito se for curto
-            // Duplicamos a lista algumas vezes para garantir que preencha a tela
-            const loopList = [...listaAvisos, ...listaAvisos, ...listaAvisos]; 
-
-            loopList.forEach(aviso => {
-                // Se o aviso tiver "URGENTE" ou "ATENÇÃO", fica vermelho
-                if(aviso.toUpperCase().includes("URGENTE") || aviso.toUpperCase().includes("ATENÇÃO")) {
-                    htmlContent += `<div class="ticker-item alert">${aviso}</div>`;
-                } else {
-                    htmlContent += `<div class="ticker-item">${aviso}</div>`;
-                }
-                htmlContent += `<div class="ticker-item separator">●</div>`;
-            });
-
-            container.innerHTML = htmlContent;
+        // 2. Se não tiver mensagem, ativa o MODO DEMO (para não ficar branco)
+        if (!msgString) {
+            msgString = "URGENTE: Configure sua URL no Notion | DICA: Use ?msgs=Aviso 1|Aviso 2 | SISTEMA: Aguardando dados...";
         }
+
+        // 3. Monta o HTML
+        const msgArray = msgString.split('|');
+        let htmlContent = "";
+
+        // Repetimos o conteúdo algumas vezes para garantir que a faixa fique cheia
+        // enquanto a animação roda
+        const loops = 5; 
+        
+        for (let i = 0; i < loops; i++) {
+            msgArray.forEach(msg => {
+                let finalMsg = msg.trim();
+                
+                // Lógica de cores (Bolsa de Valores)
+                if (finalMsg.toUpperCase().includes("URGENTE") || finalMsg.toUpperCase().includes("ATENÇÃO")) {
+                    finalMsg = `<span class="highlight-red">${finalMsg}</span>`;
+                } else if (finalMsg.toUpperCase().includes("META") || finalMsg.toUpperCase().includes("APROVADO")) {
+                    finalMsg = `<span class="highlight-green">${finalMsg}</span>`;
+                }
+
+                htmlContent += `${finalMsg} <span class="separator">■</span> `;
+            });
+        }
+
+        document.getElementById('messages').innerHTML = htmlContent;
     </script>
+
 </body>
 </html>
