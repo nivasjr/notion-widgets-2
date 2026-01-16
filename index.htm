@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Widget de Avisos</title>
+    <style>
+        /* Fundo escuro para garantir visibilidade imediata */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            background-color: #000; /* PRETO */
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            background: #222;
+            border-top: 2px solid #e16259; /* Linha vermelha de destaque */
+            border-bottom: 2px solid #e16259;
+            padding: 10px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .texto-correndo {
+            display: inline-block;
+            padding-left: 100%;
+            animation: mover 20s linear infinite;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .urgente { color: #ff4444; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
+        .normal { color: #ffffff; }
+        .separador { color: #555; margin: 0 20px; }
+
+        @keyframes mover {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(-100%, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="texto-correndo" id="letreiro">
+            CARREGANDO SISTEMA...
+        </div>
+    </div>
+
+    <script>
+        // Pega a mensagem da URL
+        const params = new URLSearchParams(window.location.search);
+        let avisos = params.get('msgs');
+
+        // Se não tiver mensagem na URL, mostra este aviso padrão
+        if (!avisos) {
+            avisos = "URGENTE: O sistema está funcionando! | Adicione ?msgs=Sua Mensagem no final do link.";
+        }
+
+        // Monta o HTML do letreiro
+        const lista = avisos.split('|');
+        let htmlFinal = "";
+        
+        // Repete 10 vezes para garantir que a faixa fique cheia
+        for(let i=0; i<10; i++) {
+            lista.forEach(aviso => {
+                let estilo = "normal";
+                if(aviso.toUpperCase().includes("URGENTE") || aviso.toUpperCase().includes("ATENÇÃO")) {
+                    estilo = "urgente";
+                }
+                htmlFinal += `<span class="${estilo}">${aviso}</span><span class="separador">///</span>`;
+            });
+        }
+
+        document.getElementById('letreiro').innerHTML = htmlFinal;
+    </script>
+
+</body>
+</html>
