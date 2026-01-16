@@ -3,86 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Widget de Avisos</title>
+    <title>Painel de Avisos</title>
     <style>
-        /* Fundo escuro para garantir visibilidade imediata */
-        body { 
-            margin: 0; 
-            padding: 0; 
-            background-color: #000; /* PRETO */
-            color: white;
-            font-family: Arial, sans-serif;
+        /* GARANTIA DE VISIBILIDADE: Fundo PRETO e texto GIGANTE */
+        body { margin: 0; padding: 0; background-color: #000; overflow: hidden; height: 100vh; display: flex; align-items: center; }
+        
+        .ticker-wrap {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            height: 100%; /* Ocupa a altura toda para garantir que veja */
+            background-color: #111; 
+            box-sizing: border-box;
             display: flex;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .container {
-            width: 100%;
-            background: #222;
-            border-top: 2px solid #e16259; /* Linha vermelha de destaque */
-            border-bottom: 2px solid #e16259;
-            padding: 10px 0;
             white-space: nowrap;
-            overflow: hidden;
-            position: relative;
+            border-top: 4px solid #e16259; /* Borda vermelha no topo */
+            border-bottom: 4px solid #e16259; /* Borda vermelha embaixo */
         }
 
-        .texto-correndo {
+        .ticker {
             display: inline-block;
             padding-left: 100%;
-            animation: mover 100s linear infinite;
-            font-size: 1.5rem;
+            animation: ticker 100s linear infinite; /* Velocidade */
+        }
+
+        .ticker__item {
+            display: inline-block;
+            padding: 0 2rem;
+            font-size: 2rem; /* Texto Grande */
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-weight: bold;
         }
 
-        .urgente { color: #ff4444; text-shadow: 0 0 5px rgba(255,0,0,0.5); }
+        .alert { color: #ff3b30; text-transform: uppercase; } /* Vermelho para Urgente */
         .normal { color: #ffffff; }
-        .separador { color: #555; margin: 0 20px; }
+        .separator { color: #555; }
 
-        @keyframes mover {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(-100%, 0); }
+        @keyframes ticker {
+            0% { transform: translate3d(0, 0, 0); }
+            100% { transform: translate3d(-100%, 0, 0); }
         }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <div class="texto-correndo" id="letreiro">
-            CARREGANDO SISTEMA...
-        </div>
+    <div class="ticker-wrap">
+        <div class="ticker" id="letreiro">
+            </div>
     </div>
 
     <script>
-        // Pega a mensagem da URL
-        const params = new URLSearchParams(window.location.search);
-        let avisos = params.get('msgs');
-
-        // Se não tiver mensagem na URL, mostra este aviso padrão
-        if (!avisos) {
-            avisos = "URGENTE: O sistema está funcionando! | Adicione ?msgs=Sua Mensagem no final do link.";
-        }
-
-        // Monta o HTML do letreiro
-        const lista = avisos.split('|');
-        let htmlFinal = "";
+        // ======================================================
+        // ÁREA DE EDIÇÃO - DIGITE SUAS MENSAGENS AQUI EMBAIXO
+        // ======================================================
         
-        // Repete 10 vezes para garantir que a faixa fique cheia
-        for(let i=0; i<10; i++) {
+        // Separe as frases usando esse traço em pé: |
+        const MENSAGENS_FIXAS = "URGENTE: mÓVEL FOI MODIFICADO | META: Fechar contrato da Sorveteria | AVISO: Reunião com Ariel às 14h";
+
+        // ======================================================
+        // FIM DA ÁREA DE EDIÇÃO - NÃO MEXA EMBAIXO
+        // ======================================================
+
+        const lista = MENSAGENS_FIXAS.split('|');
+        let htmlFinal = "";
+
+        // Repetir 20 vezes para garantir loop infinito visual
+        for(let i=0; i<20; i++) {
             lista.forEach(aviso => {
-                let estilo = "normal";
-                if(aviso.toUpperCase().includes("URGENTE") || aviso.toUpperCase().includes("ATENÇÃO")) {
-                    estilo = "urgente";
+                let texto = aviso.trim();
+                let classe = "normal";
+                
+                // Se tiver URGENTE, pinta de vermelho
+                if(texto.toUpperCase().includes("URGENTE") || texto.toUpperCase().includes("ATENÇÃO")) {
+                    classe = "alert";
                 }
-                htmlFinal += `<span class="${estilo}">${aviso}</span><span class="separador">///</span>`;
+                
+                htmlFinal += `<div class="ticker__item ${classe}">${texto}</div> <div class="ticker__item separator">///</div>`;
             });
         }
 
         document.getElementById('letreiro').innerHTML = htmlFinal;
     </script>
-
 </body>
 </html>
